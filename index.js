@@ -81,43 +81,49 @@ function runModelOnTweet(stdout){
         //     console.log("ASDASD");
         // });
 
+        jsonTweets['statuses'].forEach( function(tweet) {
 
-        let latestJsonTweet = jsonTweets['statuses'][0];
-        // console.log(latestJsonTweet);
+            console.log("Tweet: " + tweet);
 
-
-        if (latestJsonTweet !== undefined) {
+            // let latestJsonTweet = jsonTweets['statuses'][0];
+            let latestJsonTweet = tweet;
             // console.log(latestJsonTweet);
-            // console.log(jsonTweets['statuses'][0]);
-            if (latestJsonTweet['text'].match(regexp)) {
 
-                if (!foundIds.includes(latestJsonTweet['id'])) {
-                    foundIds.push(latestJsonTweet['id']);
-                    console.log(latestJsonTweet['text']);
 
-                    var wing = {};
-                    wing.heading = `Tweet from user ${latestJsonTweet['user']['name']}`;
-                    wing.story = latestJsonTweet['text'];
-                    wing.url = 'strike';
-                    wing.categories = 'strike';
-                    wing.impact = "0";
-                    wing.source = 'social_media';
+            if (latestJsonTweet !== undefined) {
+                // console.log(latestJsonTweet);
+                // console.log(jsonTweets['statuses'][0]);
+                if (latestJsonTweet['text'].match(regexp)) {
 
-                    request({
-                            url: `${url}/wing`,
-                            method: "POST",
-                            json: wing
+                    if (!foundIds.includes(latestJsonTweet['id'])) {
+                        foundIds.push(latestJsonTweet['id']);
+                        console.log(latestJsonTweet['text']);
+                        console.log(latestJsonTweet);
 
-                        },
-                        function (error, response, body) {
-                            if (error) {
-                                return console.error('upload failed:', error);
-                            }
-                            console.log('Upload successful!  Server responded with:', body);
-                        });
+                        var wing = {};
+                        wing.heading = `Tweet from user ${latestJsonTweet['user']['name']}`;
+                        wing.story = latestJsonTweet['text'];
+                        wing.url = `https://twitter.com/statuses/${latestJsonTweet['id']}`;
+                        wing.categories = 'strike';
+                        wing.impact = "0";
+                        wing.source = 'social_media';
+
+                        request({
+                                url: `${url}/wing`,
+                                method: "POST",
+                                json: wing
+
+                            },
+                            function (error, response, body) {
+                                if (error) {
+                                    return console.error('upload failed:', error);
+                                }
+                                console.log('Upload successful!  Server responded with:', body);
+                            });
+                    }
                 }
             }
-        }
+        });
 
     }
     // JSON.stringify(stdout);
