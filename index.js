@@ -24,12 +24,29 @@ let twurlUrls = ["Finavia", "Airpro", "Helsinki%20airport", "Finnair", "Trafi", 
 let url = "http://localhost:1337/api";
 
 
-var foundIds = []
+var foundIds = [];
+
+// twurlUrls.forEach(function(url) {
+//     console.log(`twurl "/1.1/search/tweets.json?q=%40${url}%20OR%20%23${url}"`);
+//     exec(`twurl "/1.1/search/tweets.json?q=%40${url}%20OR%20%23${url}"`, (err, stdout, stderr) => {
+//         if (err) {
+//             console.log(err, 'errors');
+//             return;
+//         }
+//
+//         // console.log(`stdout: ${stdout}`);
+//         // console.log(`stderr: ${stderr}`);
+//         // console.log(`stdout: ${stdout}`);
+//         if (stdout) {
+//             runModelOnTweet(stdout);
+//         }
+//     });
+// });
 
 
 let CronJob = require('cron').CronJob;
 new CronJob('* * * * *', function() {
-    console.log('You will see this message every minute');
+    console.log('Scraping for tweets..');
 
     twurlUrls.forEach(function(url) {
         console.log(`twurl "/1.1/search/tweets.json?q=%40${url}%20OR%20%23${url}"`);
@@ -74,31 +91,21 @@ function runModelOnTweet(stdout){
     var matchesArray = [];
 
     if (jsonTweets !== undefined && jsonTweets['statuses'] !== undefined) {
-        console.log("FOUND TWEET");
-
-        // jsonTweets['statuses'].forEach( function(tweet) {
-        //     console.log(tweet);
-        //     console.log("ASDASD");
-        // });
 
         jsonTweets['statuses'].forEach( function(tweet) {
 
-            console.log("Tweet: " + tweet);
+            var latestJsonTweet = tweet;
 
-            // let latestJsonTweet = jsonTweets['statuses'][0];
-            let latestJsonTweet = tweet;
-            // console.log(latestJsonTweet);
-
+            if (latestJsonTweet['retweeted_status']) {
+                latestJsonTweet = latestJsonTweet['retweeted_status'];
+            }
 
             if (latestJsonTweet !== undefined) {
-                // console.log(latestJsonTweet);
-                // console.log(jsonTweets['statuses'][0]);
                 if (latestJsonTweet['text'].match(regexp)) {
 
                     if (!foundIds.includes(latestJsonTweet['id'])) {
                         foundIds.push(latestJsonTweet['id']);
                         console.log(latestJsonTweet['text']);
-                        console.log(latestJsonTweet);
 
                         var wing = {};
                         wing.heading = `Tweet from user ${latestJsonTweet['user']['name']}`;
@@ -126,9 +133,6 @@ function runModelOnTweet(stdout){
         });
 
     }
-    // JSON.stringify(stdout);
-    // console.log(JSON.stringify(stdout));
-
 }
 
 startKoa();
